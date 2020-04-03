@@ -1,37 +1,55 @@
 # Audience: Newcommers, Hyperledger Network Admins.
 
-## Learn Hyplerledger fabric with default samples
+## Learn Hyplerledger fabric with default samples ( BYFN/EYFN)
 ## A) Explained in detail of the [fabric-samples/firstnetwork/byfn.sh] script. How the fabric network was organised with 2 orgs, 2 peers with Solo Orderer.
 ## B) Followed by org3 addition [fabric-samples/firstnetwork/eyfn.sh] script.
-##### source contributor https://github.com/ravinayag/fabric-samples-explained/README.md
-Here is the Network Diagram for the fabric ![Networkdiag](https://github.com/ravinayag/fabric-samples-explained/blob/master/network.png)
+##### source contributor https://github.com/ravinayag/fabric-samples-explained/blob/master/README.md
 
-Ensure all prerequesties are completed, if not refer this Download_script and prereq_script for ref.[prereq](https://github.com/ravinayag/Hyperledger/blob/master/prereqs_hlfv14.sh)
+Here is the Network Diagram for the fabric ![Network diagram](https://github.com/ravinayag/fabric-samples-explained/blob/master/network.png)
 
-####  1, Create folder name called newnet under fabric-samples folder and move as your working dir.
+Ensure all prerequesties are completed,if not refer this 
+* 1, Phy/Virtual Machine : Running Ubuntu OS 16.4 LTS
+* 2, [Pre_req_script](https://github.com/ravinayag/Hyperledger/raw/master/prereqs_hlfv14.sh) for ref. (Installs : Docker, Docker-composer,Npm, node, python, ca-certs and sudo access.)
+* 3, [Download_script](https://github.com/ravinayag/Hyperledger/raw/master/download_hlf.sh) for ref. (Installs : Fabric-samples, binaries, docker images )
 
-#### 2, Copy files from first-network as below
+*Note 1: This Will download Fabric-samples binaries in current folder and docker images.
+I have run this script from my homefolder ex: /home/ravinayag and Fabric-samples folder will be created here.*
 
 
+
+*Note 2 : The Recent Fabric samples masters(>1.4.3), chaincode_example02 is not availble. Hence i update this folder here. you have to copy this folder under fabric-samples/chaincode folder.*
+
+#### Check List for prereq readiness :
+* 1, Docker, Docker-composer,Npm, node, python, ca-certs and sudo access.
+* 2, Fabric-samples, binaries, docker images 
+
+##### Do not proceed further if above pre req not completed. If you have issues, Please raise your hands over hyperledger chat or weekly call
+
+#### Lets begin to dirt our hands.
+
+###  1, Clone/download this repo and name it as "newnet" under fabric-samples folder and move as your working directory.
+
+ 
 ```
-~newnet$ pwd
-yourhomepath/fabric-samples/newnet/
+~newnet$ mv
+yourhomepath/fabric-samples/fabric-samples-explaind yourhomepath/fabric-samples/newnet
 
-~newnet$ mkdir  channel-artifacts base scripts && cp -r ../first-network/configtx.yaml, ../first-network/crypto-config.yaml, ../first-netwotk/docker-compose-cli.yaml base/*  .
 
 set bin path 
 export PATH=${PWD}/../bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
-
+ 
 ```
 
 ## Stage -1 
 #### 3, Now set the environment variables by running script which generates genisis block and run the docker contiainer
 
 ```
- $ . ./scripts/1_envsetup.sh
+ $  source ./scripts/1_envsetup.sh
 ```
 #### OR 
+
+TechTip1 : Your Syschannel name should be different  from the public channel name. Syschannel name is used to create Genesis block. 
 ```
 
 export PATH=${PWD}/../bin:${PWD}:$PATH
@@ -42,24 +60,29 @@ export CHANNEL_NAME=mychannel2
 export IMAGE_TAG=latest
 export COMPOSE_PROJECT_NAME=newnet
 
-### Generate artifacts
-cryptogen generate --config=./crypto-config.yaml
 
-### Create Sys channel for genesis block
-configtxgen -profile TwoOrgsOrdererGenesis -channelID $SYS_CHANNEL -outputBlock ./channel-artifacts/genesis.block
 ```
 
-####  1a,  Run the this script to genrate the artifacts given ini crypto-config file and generate genesis block
-Note: This script has to execute first time only or fresh install
+####  1a,  Run the this script to genrate the artifacts given in crypto-config file and generate genesis block
+Note: This script has to execute first time only or fresh install, If clone you no need to run unless you delete manually crypto-config & channel-artifacts folder
 ```
- $ . ./scripts/1a_firsttimeonly.sh
+ $  ./scripts/1a_firsttimeonly.sh
 ```
 #### OR 
 ```
+### Generate artifacts
+rm -rf crypto-config channel-artifacts
 cryptogen generate --config=./crypto-config.yaml
+
+### Create Sys channel for genesis block
+mkdir channel-artifacts
 configtxgen -profile TwoOrgsOrdererGenesis -channelID $SYS_CHANNEL -outputBlock ./channel-artifacts/genesis.block
 
+### create channel.tx file
+
 configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/channel.tx -channelID $CHANNEL_NAME
+
+### create Anchor peer file for Org
 configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
 configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org2MSP
 ```
@@ -68,12 +91,14 @@ configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts
 ```
 $ docker-compose -f docker-compose-cli.yaml up -d
 $ docker ps -a   ## this will show you all  6 containers up and running. ( orderer, 2 peers on each org's (2 org) and cli)
+Note : If you have errors at this stage(dockers not up), then delete crypto-config folder and run script/1a_firsttimeonly.sh file
+
 ```
 
 ####  2,  Create channel with script
 
 ```
- $ . ./scripts/ 2_channlCrt.sh
+ $  ./scripts/2_chanlCrt.sh
 ```
 #### OR 
 ```
@@ -84,21 +109,20 @@ export CORE_PEER_TLS_ENABLED=true
 docker exec cli peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls $CORE_TLS_ENABLED --cafile $ORDERER_CA
 ```
 
-2a_peer0.org1_chljoin.sh
+
 
 
 #### 2a, Now join the peers to the channel one by one 
 
+
 ```
-
-
 ######### First peer0 of Org1 ########
 
-
 newnet $ docker exec cli sh ./scripts/2a_peer0.org1_chljoin.sh
-
+```
 OR 
 
+```
 $ docker exec -it cli bash   ### you get the root prompt for  cli contianer and execute all commands from here.
 
 set -x
@@ -200,7 +224,7 @@ CORE_PEER_ADDRESS=peer0.org1.example.com:7051
 ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org1MSPanchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA
 ```
-#### 5, Now update anchor peer for org2 to the channel  
+#### 7, Now update anchor peer for org2 to the channel  
 ######### Repeat same from the second org - Org2 ##########
 
 ```
@@ -236,7 +260,7 @@ your network consists of one orderer and 4 peers ( 2 from each org.)
 we have one cli container to execute our binaries.
 
 Lets install the chaincode on peer0.org1 export the variables first.
-### Chaincode install/instantiate
+### 8, Chaincode install
 ```
 newnet$ docker exec cli sh ./scripts/8_ccinstallpeer0.org1.sh
 ```
@@ -255,7 +279,7 @@ export CORE_PEER_ID=cli
 export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
 peer chaincode install -n mycc -v 1.0 -l golang -p github.com/chaincode/chaincode_example02/go/
 ```
-###### Do it same for Org2
+###### 9, Do it same for Org2
 Install chaincode on peer0.org2...
 ```
 newnet$ docker exec cli sh ./scripts/9_ccinstallpeer0.org2.sh
@@ -286,7 +310,7 @@ export CORE_PEER_ID=cli
 export CORE_PEER_ADDRESS=peer1.org2.example.com:10051
 peer chaincode install -n mycc -v 1.0 -l golang -p github.com/chaincode/chaincode_example02/go/
 ```
-
+### 10, Instantiate 
 We have installed our chaincode/smartcontracts to peers, Now instantiate the chaincode/smartcontract to the network (channnel)
 you can run the script or below with variables
 ```
@@ -314,7 +338,7 @@ After instantiate the chaincode, you can do query the assets to confirm its been
 
 Tips : The ledgers are stored in /var/hyperledger/production/ on each peer.
 
-Querying chaincode on peer0.org1...
+### 11, Querying chaincode on peer0.org1...
 
 
 ```
@@ -334,7 +358,7 @@ export CORE_PEER_ID=cli
 export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
 peer chaincode query -C mychannel2 -n mycc -c '{"Args":["query","a"]}'
 ```
-
+### 12, Invoke Transaction
 Im transferring the some value from A to B 
 Lets invoke the transaction from "A" to "B"   and do query from pee1.org2 for transaction status
 
@@ -365,6 +389,8 @@ export PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/p
 peer chaincode invoke -o orderer.example.com:7050 --tls true --cafile $ORDERER_CA  -C mychannel2 -n mycc --peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles $PEER0_ORG1_CA  --peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles $PEER0_ORG2_CA -c '{"Args":["invoke","a","b","10"]}'
 
  ```
+
+### 13, Query from different peer
 
  Query from  Peer1.org2 and you should get value of "a" is 90.
 
@@ -403,15 +429,15 @@ peer chaincode query -C mychannel2 -n mycc -c '{"Args":["query","a"]}'
 
 Copy files from first-network folder
 
-#### 1, Directory  of org3-artifacts and file docker-compose-org3.yaml	
+#### Directory  of org3-artifacts and file docker-compose-org3.yaml	
 ```
 newnet$ cp -r ../first-network/org3-artifacts .  && cp ../first-network/docker-compose-org3.yaml .
 ```
 Change dir to /yourhomepath/fabric-samples/newnet/org3-artifacts
 
-#### 2,  Doing pre requesties for Org3
+#### 14,  Doing pre requesties for Org3
 ```
-newnet$ docker exec cli sh ./scripts/14_prereq_addorg.sh
+newnet$ ./scripts/14_prereq_addorg.sh
 ```
 OR
 ```
@@ -421,11 +447,13 @@ OR
 $ cryptogen generate --config=./org3-crypto.yaml    ### Note :  First time only.
 
 $ export FABRIC_CFG_PATH=$PWD && ../../bin/configtxgen -printOrg Org3MSP > ../channel-artifacts/org3.json
+Note : If you have errors at this stage, then delete crypto-config folder and generate certs by cryptogen 
+
 $ cd ../ && cp -r crypto-config/ordererOrganizations org3-artifacts/crypto-config/
 $ sudo apt-get -y update && sudo apt-get -y install jq    ### Note :  First time only.
  
 ```
-#### 3,  Gathering the Channel configurations and updating with new org to existing channel
+#### 15,  Gathering the Channel configurations and updating with new org to existing channel
 ```
 newnet$ docker exec cli sh ./scripts/15_addorg_netup.sh
 ```
@@ -465,10 +493,10 @@ export CORE_PEER_ADDRESS=peer0.org2.example.com:9051
 peer channel update -f org3_update_in_envelope.pb -c $CHANNEL_NAME -o orderer.example.com:7050 --tls --cafile $ORDERER_CA
 ```
 
-#### 4, Lets the org3 container make up and get into org3cli to join the channel
+#### 16, Lets the org3 container spin up and get into org3cli to join the network channel 
 
 ```
-newnet$ docker exec cli sh ./scripts/16_addorg_joinnet.sh
+~newnet$ ./scripts/16_addorg_joinnet.sh
 ```
 OR
 
@@ -482,27 +510,32 @@ $ export CHANNEL_NAME=mychannel2
 $ peer channel fetch 0 mychannel2.block -o orderer.example.com:7050 -c $CHANNEL_NAME --tls --cafile $ORDERER_CA
 $ peer channel join -b mychannel2.block
 ```
-##### 4.a  Do this for second peer1.org3 ( this is optional for demo requirement)
+##### 17,  Do this for second peer1.org3 ( this is optional for demo requirement)
 ```
-newnet$ docker exec cli sh ./scripts/17_addorg_ccins_qry.sh
+newnet$ docker exec Org3cli sh ./scripts/17_addorg_ccins_qry.sh
 ```
 OR
 
 ```
+$ docker exec -it Org3cli bash
 $ export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/tls/ca.crt 
 $ export CORE_PEER_ADDRESS=peer1.org3.example.com:12051
 $ peer channel join -b mychannel2.block
-
-#### 5, Install Chaincode. 
-##comeback to peer0.org3 and install chaincode
+```
+#### 17a, Install Chaincode/Query. 
+### Comeback to peer0.org3 and install chaincode
+### Query from org3 node for the assets Do this step after chaincode has instantiated from Org2.
+```
 $ export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt 
 export CORE_PEER_ADDRESS=peer0.org3.example.com:11051
+
 peer chaincode install -n mycc -v 1.0 -l golang -p github.com/chaincode/chaincode_example02/go/
 
-## Query from org3 node for the assets Do this step after chaincode has instantiated from Org2.
 peer chaincode query -C mychannel2 -n mycc -c '{"Args":["query","a"]}'
 
 ```
 
+Hope this helps you to understand the BYFN / EYFN. Give thumbsup to motivate me. 
+Thank you  !!!
 
-#########################################################################################
+#################################################################################
