@@ -144,10 +144,10 @@ peer channel join -b $CHANNEL_NAME.block
 ######### Second, peer1 of Org1 ########
 ```
 newnet$ docker exec cli sh ./scripts/3_peer1.org1_chljoin.sh
-
+```
 OR 
 
-
+```
 $ docker exec -it cli bash   ### you get the root prompt for contianer
 set -x
 CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
@@ -207,9 +207,9 @@ peer channel join -b $CHANNEL_NAME.block
 ####  6, Update anchor PEER channel for orgs, so the second peers will interact with peer0(anchor peer0) for transactions and only peer0 is exposed to the world.
 ```
 $ docker exec cli sh ./scripts/6_anchorpeerorg1.sh
-
+```
 OR 
-
+```
 $ docker exec -it cli bash   ### you get the root prompt for contianer
 set -x
 CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
@@ -523,8 +523,8 @@ $ export CORE_PEER_ADDRESS=peer1.org3.example.com:12051
 $ peer channel join -b mychannel2.block
 ```
 #### 17a, Install Chaincode/Query. 
-### Comeback to peer0.org3 and install chaincode
-### Query from org3 node for the assets Do this step after chaincode has instantiated from Org2.
+##### Comeback to peer0.org3 and install chaincode
+##### Query from org3 node for the assets Do this step after chaincode has instantiated from Org2.
 ```
 $ export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt 
 export CORE_PEER_ADDRESS=peer0.org3.example.com:11051
