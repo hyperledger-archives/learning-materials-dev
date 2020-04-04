@@ -33,11 +33,14 @@ I have run this script from my homefolder ex: /home/ravinayag and Fabric-samples
 ```
 ~newnet$ mv
 yourhomepath/fabric-samples/fabric-samples-explaind yourhomepath/fabric-samples/newnet
+<<<<<<< HEAD
 
 
 set bin path 
 export PATH=${PWD}/../bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
+=======
+>>>>>>> master
  
 ```
 
