@@ -15,9 +15,12 @@ Ensure all prerequesties are completed,if not refer this
 *Note 1: This Will download Fabric-samples binaries in current folder and docker images.
 I have run this script from my homefolder ex: /home/ravinayag and Fabric-samples folder will be created here.*
 
+
 *Note 2 : The Recent Fabric samples masters(>1.4.3), chaincode_example02 is not availble. Hence i update this folder here. you have to copy this folder under fabric-samples/chaincode folder.*
 
 * ####  Explainer Video @ [YouTube - Part1 ](https://www.youtube.com/watch?v=HtAT1hSaVN0&t=25s)  & [YouTube - Part2 ](https://www.youtube.com/watch?v=PHImeydK1p0&t=18s) 
+=======
+
 
 #### Check List for prereq readiness :
 * 1, Docker, Docker-composer,Npm, node, python, ca-certs and sudo access.
