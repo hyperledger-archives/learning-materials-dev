@@ -16,7 +16,6 @@ Ensure all prerequesties are completed,if not refer this
 I have run this script from my homefolder ex: /home/ravinayag and Fabric-samples folder will be created here.*
 
 
-
 *Note 2 : The Recent Fabric samples masters(>1.4.3), chaincode_example02 is not availble. Hence i update this folder here. you have to copy this folder under fabric-samples/chaincode folder.*
 
 #### Check List for prereq readiness :
